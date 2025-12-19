@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SyncMP3.Models;
 using Microsoft.Extensions.Configuration;
-using System.IO;
+
 namespace SyncMP3.Data;
 
 public partial class SyncMp3Context : DbContext
@@ -31,15 +31,7 @@ public partial class SyncMp3Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var config = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("AppSettings.json", optional: true, reloadOnChange: true)
-        .AddEnvironmentVariables()
-        .Build();
-
-        string connectionString = config.GetConnectionString("DefaultConnection")!;
-
-        optionsBuilder.UseSqlServer(connectionString);
+        
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

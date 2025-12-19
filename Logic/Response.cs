@@ -2,8 +2,9 @@ using System.Net;
 using System.Text;
 class Response
 {
-    public static async Task TextResponse(HttpListenerResponse response, string text, int statusCode = 200)
+    public static async Task TextResponse(HttpListenerContext httpContext, string text, int statusCode = 200)
     {
+        HttpListenerResponse response = httpContext.Response;
         byte[] buffer = Encoding.UTF8.GetBytes(text);
 
         response.StatusCode = statusCode;
