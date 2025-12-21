@@ -28,16 +28,19 @@ class Program
 
         while (true)
         {
-            HttpListenerContext HttpContext = await listener.GetContextAsync();
+            HttpListenerContext httpContext = await listener.GetContextAsync();
             SyncMp3Context dbContext = new SyncMp3Context(options);
-            //Authenticate
 
-
-            await LookForEndpoint(HttpContext, dbContext);
+            if (await Authenticate.RequestValid(httpContext, dbContext))
+            {
+                await LookForEndpoint(httpContext, dbContext);
+            }
+            else
+            {
+                await Response.TextResponse(httpContext, "Invalid Request");
+            }
         }
-
     }
-
     private static async Task LookForEndpoint(HttpListenerContext httpContext, SyncMp3Context dbContext)
     {
         HttpListenerRequest request = httpContext.Request;
@@ -48,8 +51,15 @@ class Program
             case "/ping":
                 //await Endpoints.PingResponse(response);
                 break;
-            case "/create":
-                await EasyEndpoints.CreateNewUser(httpContext, dbContext);
+            case "/create-network":
+                break;
+            case "/get-music":
+                break;
+            case "/upload":
+                break;
+            case "/add-user":
+                break;
+            case "/generate-passkey":
                 break;
             default:
                 //await Endpoints.DefaultResponse(response);

@@ -1,4 +1,4 @@
-class HelperMethods
+class HttpHelpers
 {
     public static Dictionary<string, string> GetAllHeaders()
     {

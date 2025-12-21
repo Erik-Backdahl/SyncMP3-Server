@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SyncMP3.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace SyncMP3.Data;
 
@@ -185,8 +184,7 @@ public partial class SyncMp3Context : DbContext
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Created)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("CREATED");
+                .HasColumnType("datetime");
             entity.Property(e => e.NetworkGuid)
                 .HasMaxLength(36)
                 .IsUnicode(false)

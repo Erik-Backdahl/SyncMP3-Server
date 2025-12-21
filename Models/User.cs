@@ -15,8 +15,6 @@ public partial class User
 
     public DateTime? Created { get; set; }
 
-    public string? PublicKey { get; set; }
-
     public virtual ICollection<CurrentNetworkRegisteredSong> CurrentNetworkRegisteredSongs { get; set; } = new List<CurrentNetworkRegisteredSong>();
 
     public virtual ICollection<CurrentUserRegisteredSong> CurrentUserRegisteredSongs { get; set; } = new List<CurrentUserRegisteredSong>();
