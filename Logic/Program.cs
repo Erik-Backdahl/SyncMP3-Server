@@ -43,29 +43,52 @@ class Program
     }
     private static async Task LookForEndpoint(HttpListenerContext httpContext, SyncMp3Context dbContext)
     {
-        HttpListenerRequest request = httpContext.Request;
-        string path = request.Url?.AbsolutePath ?? string.Empty;
-
-        switch (path)
+        try
         {
-            case "/ping":
-                //await Endpoints.PingResponse(response);
-                break;
-            case "/create-network":
-                break;
-            case "/get-music":
-                break;
-            case "/upload":
-                break;
-            case "/add-user":
-                break;
-            case "/generate-passkey":
-                break;
-            default:
-                //await Endpoints.DefaultResponse(response);
-                break;
+
+
+            HttpListenerRequest request = httpContext.Request;
+            string path = request.Url?.AbsolutePath ?? string.Empty;
+
+            switch (path)
+            {
+                case "/ping":
+                    await EndpointEntry.Ping(httpContext, dbContext);////////
+                    break;
+                case "/get-music":
+                    await EndpointEntry.GetMusic(httpContext, dbContext);////////
+                    break;
+                case "/upload":
+                    await EndpointEntry.Upload(httpContext, dbContext);////////
+                    break;
+                case "/maintenance":
+                    await EndpointEntry.Maintain(httpContext, dbContext);////////
+                    break;
+                case "/add-user":
+                    await EndpointEntry.AddUser(httpContext, dbContext);
+                    break;
+                case "/create-network":
+                    await EndpointEntry.CreateNewNetwork(httpContext, dbContext);
+                    break;
+                case "/generate-password":
+                    await EndpointEntry.GeneratePassword(httpContext, dbContext);////////
+                    break;
+                case "/remove-user":
+                    await EndpointEntry.RemoveUser(httpContext, dbContext);////////
+                    break;
+                case "/transfer-title":
+                    await EndpointEntry.TransferTitle(httpContext, dbContext);////////
+                    break;
+                default:
+                    await EndpointEntry.Default(httpContext, dbContext);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await Response.TextResponse(httpContext, "Internal server error", 500);
+            return;
         }
     }
-
-
 }

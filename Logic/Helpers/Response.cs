@@ -19,9 +19,9 @@ class Response
     {
         byte[] buffer = Encoding.UTF8.GetBytes(contentText);
 
-        foreach(var header in headers)
+        foreach (var header in headers)
         {
-            response.Headers.Add(header.Key, header.Value);
+            response.AddHeader(header.Key, header.Value);
         }
         response.StatusCode = statusCode;
         response.ContentType = "text/plain";
@@ -34,5 +34,26 @@ class Response
     public static async Task SongResponse(HttpListenerResponse response, byte[] songBytes, Dictionary<string, string> headers, int statusCode = 200)
     {
 
+    }
+
+    public static async Task IncrementalResponseHeader(HttpListenerResponse response, Dictionary<string, string> headers, bool finalize = false)
+    {
+        foreach (var header in headers)
+        {
+            response.AddHeader(header.Key, header.Value);
+        }
+
+        response.Close(); // Close the response after all chunks are written
+    }
+    public static async Task IncrementalResponseFinal(HttpListenerResponse response, string contentText, int statusCode = 200)
+    {
+        byte[] buffer = Encoding.UTF8.GetBytes(contentText);
+
+        response.StatusCode = statusCode;
+        response.ContentType = "text/plain";
+        response.ContentLength64 = buffer.Length;
+
+        await response.OutputStream.WriteAsync(buffer);
+        response.Close();
     }
 }

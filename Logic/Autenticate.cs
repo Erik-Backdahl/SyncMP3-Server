@@ -14,30 +14,24 @@ class Authenticate
 
         if (string.IsNullOrEmpty(requestUuid) || !Guid.TryParse(requestUuid, out _))
             return false;
-        if (requestGuid == null)
-            return false;
-
-        User? currentUser = dbContext.Users.FirstOrDefault(u => u.UserUuid == requestUuid);
-        if(currentUser == null)
+        if (!dbContext.Users.Any(u => u.UserUuid == requestUuid))
         {
             await CreateEntries.NewUser(httpContext, dbContext);
             return false;
         }
 
-        //a request needs a guid header. if not in a network it should be an empty string
-        //if its the users first time pinging the server they never have a guid header so the tryparse below is moved down insted of being above
-    
-        if(Guid.TryParse(requestGuid, out _))
-            return false;
-        if(currentUser.NetworkGuid == requestGuid || currentUser.NetworkGuid == null)
+        if (dbContext.Users.Where(u => u.NetworkGuid == requestGuid && u.UserUuid == requestUuid).Any())
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     internal static bool VaildMusicRequest(HttpListenerContext httpContext, SyncMp3Context dbContext)
     {
         return true;
     }
-    
 }
