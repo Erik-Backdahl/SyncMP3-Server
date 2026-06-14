@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
-    public DbSet<User> Users { get; set; }
+    public DbSet<DomainUser> DomainUsers { get; set; }
     public DbSet<NetWork> Networks { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<RequestedSong> RequestedSongs { get; set; }
@@ -12,18 +13,20 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         // TPT inheritance for RequestedSong
         modelBuilder.Entity<Song>().ToTable("Songs");
         modelBuilder.Entity<RequestedSong>().ToTable("RequestedSongs");
 
-        // Network -> Owner (one of the Users)
+        // Network -> Owner (one of the DomainUsers)
         modelBuilder.Entity<NetWork>()
             .HasOne(n => n.OwnerNavigation)
             .WithMany()
             .HasForeignKey(n => n.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Network -> Users (many-to-many)
+        // Network -> Users (one-to-many)
         modelBuilder.Entity<NetWork>()
             .HasMany(n => n.Users)
             .WithOne(u => u.NetworkNavigation)
@@ -48,12 +51,12 @@ public class AppDbContext : DbContext
             .WithMany(n => n.DownloadedSongs)
             .HasForeignKey(ds => ds.NetworkId);
 
-        // Song -> DownloadedBy (many-to-many with User)
+        // Song -> DownloadedBy (many-to-many with DomainUser)
         modelBuilder.Entity<Song>()
             .HasMany(s => s.DownloadedBy)
             .WithMany(u => u.CurrentSongs);
 
-        // RequestedSong -> RequestedBy (many-to-many with User)
+        // RequestedSong -> RequestedBy (many-to-many with DomainUser)
         modelBuilder.Entity<RequestedSong>()
             .HasMany(rs => rs.RequestedBy)
             .WithMany(u => u.RequestedSongs);

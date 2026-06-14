@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-public partial class User
+public partial class DomainUser
 {
     [Key]
     public required Guid Id { get; set; }
