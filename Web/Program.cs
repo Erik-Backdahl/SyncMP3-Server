@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SyncMP3.Web
 {
-    internal class Program
+    public partial class Program
     {
         static void Main(string[] args)
         {
@@ -21,7 +21,7 @@ namespace SyncMP3.Web
             }
 
             app.UseHttpsRedirection();
-
+            app.UseMiddleware<CheckUserExistsMiddleware>();
             TestMapping.ConfigureEndpoints(app);
 
             app.Run();
