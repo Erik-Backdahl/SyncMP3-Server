@@ -3,7 +3,7 @@ public partial class Song
 {
     public Guid Id { get; set; }
     public Guid NetworkId { get; set; }
-    public NetWork NetworkNavigation { get; set; } = null!;
+    public Network NetworkNavigation { get; set; } = null!;
 
     [MaxLength(300)]
     public string? Name { get; set; }

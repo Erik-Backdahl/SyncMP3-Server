@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SyncMp3DbContext))]
+    partial class SyncMp3DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -108,34 +108,19 @@ namespace Infrastructure.Migrations
                     b.ToTable("DomainUsers");
                 });
 
-            modelBuilder.Entity("DomainUserRequestedSong", b =>
-                {
-                    b.Property<Guid>("RequestedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RequestedSongsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("RequestedById", "RequestedSongsId");
-
-                    b.HasIndex("RequestedSongsId");
-
-                    b.ToTable("DomainUserRequestedSong");
-                });
-
             modelBuilder.Entity("DomainUserSong", b =>
                 {
-                    b.Property<Guid>("CurrentSongsId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("DownloadedById")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("CurrentSongsId", "DownloadedById");
+                    b.Property<Guid>("DownloadedSongsId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("DownloadedById");
+                    b.HasKey("DownloadedById", "DownloadedSongsId");
 
-                    b.ToTable("DomainUserSong");
+                    b.HasIndex("DownloadedSongsId");
+
+                    b.ToTable("UserDownloadedSongs", (string)null);
                 });
 
             modelBuilder.Entity("DownloadedSong", b =>
@@ -146,6 +131,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -154,11 +142,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OriginId")
-                        .HasMaxLength(36)
+                    b.Property<Guid>("SongId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SongId")
+                    b.Property<Guid>("UploadedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -167,6 +154,8 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SongId")
                         .IsUnique();
+
+                    b.HasIndex("UploadedBy");
 
                     b.ToTable("DownloadedSongs");
                 });
@@ -304,7 +293,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("NetWork", b =>
+            modelBuilder.Entity("Network", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -326,9 +315,6 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DownloadedSongId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("DurationSeconds")
                         .HasColumnType("int");
 
@@ -343,74 +329,88 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("NetworkId");
 
-                    b.ToTable("Songs", (string)null);
-
-                    b.UseTptMappingStrategy();
+                    b.ToTable("Songs");
                 });
 
-            modelBuilder.Entity("RequestedSong", b =>
+            modelBuilder.Entity("SongRequest", b =>
                 {
-                    b.HasBaseType("Song");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("RequestedSongs", (string)null);
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RequestedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NetworkId");
+
+                    b.HasIndex("RequestedById");
+
+                    b.HasIndex("SongId");
+
+                    b.ToTable("SongRequests");
                 });
 
             modelBuilder.Entity("DomainUser", b =>
                 {
-                    b.HasOne("NetWork", "NetworkNavigation")
+                    b.HasOne("Network", "NetworkNavigation")
                         .WithMany("Users")
-                        .HasForeignKey("NetworkId");
+                        .HasForeignKey("NetworkId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("NetworkNavigation");
                 });
 
-            modelBuilder.Entity("DomainUserRequestedSong", b =>
-                {
-                    b.HasOne("DomainUser", null)
-                        .WithMany()
-                        .HasForeignKey("RequestedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RequestedSong", null)
-                        .WithMany()
-                        .HasForeignKey("RequestedSongsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DomainUserSong", b =>
                 {
-                    b.HasOne("Song", null)
-                        .WithMany()
-                        .HasForeignKey("CurrentSongsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DomainUser", null)
                         .WithMany()
                         .HasForeignKey("DownloadedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Song", null)
+                        .WithMany()
+                        .HasForeignKey("DownloadedSongsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("DownloadedSong", b =>
                 {
-                    b.HasOne("NetWork", "NetWorkNavigation")
+                    b.HasOne("Network", "NetworkNavigation")
                         .WithMany("DownloadedSongs")
                         .HasForeignKey("NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Song", "SongNavigation")
-                        .WithOne("DownloadedSongNavigation")
+                        .WithOne("DownloadedSong")
                         .HasForeignKey("DownloadedSong", "SongId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("NetWorkNavigation");
+                    b.HasOne("DomainUser", "UploadedByNavigation")
+                        .WithMany()
+                        .HasForeignKey("UploadedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NetworkNavigation");
 
                     b.Navigation("SongNavigation");
+
+                    b.Navigation("UploadedByNavigation");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -464,7 +464,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("NetWork", b =>
+            modelBuilder.Entity("Network", b =>
                 {
                     b.HasOne("DomainUser", "OwnerNavigation")
                         .WithMany()
@@ -477,7 +477,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Song", b =>
                 {
-                    b.HasOne("NetWork", "NetworkNavigation")
+                    b.HasOne("Network", "NetworkNavigation")
                         .WithMany("NetworkSongs")
                         .HasForeignKey("NetworkId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -486,27 +486,54 @@ namespace Infrastructure.Migrations
                     b.Navigation("NetworkNavigation");
                 });
 
-            modelBuilder.Entity("RequestedSong", b =>
+            modelBuilder.Entity("SongRequest", b =>
                 {
-                    b.HasOne("Song", null)
-                        .WithOne()
-                        .HasForeignKey("RequestedSong", "Id")
+                    b.HasOne("Network", "NetworkNavigation")
+                        .WithMany("SongRequests")
+                        .HasForeignKey("NetworkId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DomainUser", "RequestedByNavigation")
+                        .WithMany("SongRequests")
+                        .HasForeignKey("RequestedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Song", "SongNavigation")
+                        .WithMany("SongRequests")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("NetworkNavigation");
+
+                    b.Navigation("RequestedByNavigation");
+
+                    b.Navigation("SongNavigation");
                 });
 
-            modelBuilder.Entity("NetWork", b =>
+            modelBuilder.Entity("DomainUser", b =>
+                {
+                    b.Navigation("SongRequests");
+                });
+
+            modelBuilder.Entity("Network", b =>
                 {
                     b.Navigation("DownloadedSongs");
 
                     b.Navigation("NetworkSongs");
+
+                    b.Navigation("SongRequests");
 
                     b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Song", b =>
                 {
-                    b.Navigation("DownloadedSongNavigation");
+                    b.Navigation("DownloadedSong");
+
+                    b.Navigation("SongRequests");
                 });
 #pragma warning restore 612, 618
         }

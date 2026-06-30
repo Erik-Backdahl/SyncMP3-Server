@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-public partial class NetWork
+public partial class Network
 {
     [Key]
     public Guid Id { get; set; }
@@ -9,4 +9,5 @@ public partial class NetWork
     public List<DomainUser> Users { get; set; } = [];
     public List<Song> NetworkSongs { get; set; } = [];
     public List<DownloadedSong> DownloadedSongs { get; set; } = [];
+    public List<SongRequest> SongRequests { get; set; } = [];
 }

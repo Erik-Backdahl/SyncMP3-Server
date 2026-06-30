@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -157,18 +157,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DomainUserRequestedSong",
-                columns: table => new
-                {
-                    RequestedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RequestedSongsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DomainUserRequestedSong", x => new { x.RequestedById, x.RequestedSongsId });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DomainUsers",
                 columns: table => new
                 {
@@ -206,7 +194,6 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DownloadedSongId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     DurationSeconds = table.Column<int>(type: "int", nullable: false)
                 },
@@ -222,30 +209,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DomainUserSong",
-                columns: table => new
-                {
-                    CurrentSongsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DownloadedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DomainUserSong", x => new { x.CurrentSongsId, x.DownloadedById });
-                    table.ForeignKey(
-                        name: "FK_DomainUserSong_DomainUsers_DownloadedById",
-                        column: x => x.DownloadedById,
-                        principalTable: "DomainUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DomainUserSong_Songs_CurrentSongsId",
-                        column: x => x.CurrentSongsId,
-                        principalTable: "Songs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DownloadedSongs",
                 columns: table => new
                 {
@@ -254,17 +217,24 @@ namespace Infrastructure.Migrations
                     SongId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FilePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    OriginId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 36, nullable: false)
+                    UploadedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DownloadedSongs", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_DownloadedSongs_DomainUsers_UploadedBy",
+                        column: x => x.UploadedBy,
+                        principalTable: "DomainUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_DownloadedSongs_Networks_NetworkId",
                         column: x => x.NetworkId,
                         principalTable: "Networks",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_DownloadedSongs_Songs_SongId",
                         column: x => x.SongId,
@@ -273,17 +243,55 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RequestedSongs",
+                name: "SongRequests",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SongId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequestedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RequestedSongs", x => x.Id);
+                    table.PrimaryKey("PK_SongRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RequestedSongs_Songs_Id",
-                        column: x => x.Id,
+                        name: "FK_SongRequests_DomainUsers_RequestedById",
+                        column: x => x.RequestedById,
+                        principalTable: "DomainUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SongRequests_Networks_NetworkId",
+                        column: x => x.NetworkId,
+                        principalTable: "Networks",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SongRequests_Songs_SongId",
+                        column: x => x.SongId,
+                        principalTable: "Songs",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserDownloadedSongs",
+                columns: table => new
+                {
+                    DownloadedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DownloadedSongsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserDownloadedSongs", x => new { x.DownloadedById, x.DownloadedSongsId });
+                    table.ForeignKey(
+                        name: "FK_UserDownloadedSongs_DomainUsers_DownloadedById",
+                        column: x => x.DownloadedById,
+                        principalTable: "DomainUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserDownloadedSongs_Songs_DownloadedSongsId",
+                        column: x => x.DownloadedSongsId,
                         principalTable: "Songs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -329,19 +337,9 @@ namespace Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DomainUserRequestedSong_RequestedSongsId",
-                table: "DomainUserRequestedSong",
-                column: "RequestedSongsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DomainUsers_NetworkId",
                 table: "DomainUsers",
                 column: "NetworkId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DomainUserSong_DownloadedById",
-                table: "DomainUserSong",
-                column: "DownloadedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadedSongs_NetworkId",
@@ -355,45 +353,55 @@ namespace Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadedSongs_UploadedBy",
+                table: "DownloadedSongs",
+                column: "UploadedBy");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Networks_OwnerId",
                 table: "Networks",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SongRequests_NetworkId",
+                table: "SongRequests",
+                column: "NetworkId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SongRequests_RequestedById",
+                table: "SongRequests",
+                column: "RequestedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SongRequests_SongId",
+                table: "SongRequests",
+                column: "SongId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Songs_NetworkId",
                 table: "Songs",
                 column: "NetworkId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_DomainUserRequestedSong_DomainUsers_RequestedById",
-                table: "DomainUserRequestedSong",
-                column: "RequestedById",
-                principalTable: "DomainUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DomainUserRequestedSong_RequestedSongs_RequestedSongsId",
-                table: "DomainUserRequestedSong",
-                column: "RequestedSongsId",
-                principalTable: "RequestedSongs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "IX_UserDownloadedSongs_DownloadedSongsId",
+                table: "UserDownloadedSongs",
+                column: "DownloadedSongsId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DomainUsers_Networks_NetworkId",
                 table: "DomainUsers",
                 column: "NetworkId",
                 principalTable: "Networks",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Networks_DomainUsers_OwnerId",
-                table: "Networks");
+                name: "FK_DomainUsers_Networks_NetworkId",
+                table: "DomainUsers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -411,13 +419,13 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "DomainUserRequestedSong");
-
-            migrationBuilder.DropTable(
-                name: "DomainUserSong");
-
-            migrationBuilder.DropTable(
                 name: "DownloadedSongs");
+
+            migrationBuilder.DropTable(
+                name: "SongRequests");
+
+            migrationBuilder.DropTable(
+                name: "UserDownloadedSongs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -426,16 +434,13 @@ namespace Infrastructure.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "RequestedSongs");
-
-            migrationBuilder.DropTable(
                 name: "Songs");
 
             migrationBuilder.DropTable(
-                name: "DomainUsers");
+                name: "Networks");
 
             migrationBuilder.DropTable(
-                name: "Networks");
+                name: "DomainUsers");
         }
     }
 }
