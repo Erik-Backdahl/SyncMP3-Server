@@ -9,7 +9,18 @@ public class UserRepository : IUserRepository
     }
     public async Task<bool> UserNetworkMatchesUser(Guid userId, string? networkId)
     {
-        return await _dbContext.DomainUsers.AnyAsync(u => u.Id == userId && u.NetworkId.ToString() == networkId);
+        Guid? parsedNetworkId = null;
+
+        if (networkId != null)
+        {
+            if (!Guid.TryParse(networkId, out var parsed))
+                throw new BadRequestException("Invalid NetworkId format");
+
+            parsedNetworkId = parsed;
+        }
+
+        return await _dbContext.DomainUsers
+            .AnyAsync(u => u.Id == userId && u.NetworkId == parsedNetworkId);
     }
     public async Task CreateUser(DomainUser newUser)
     {

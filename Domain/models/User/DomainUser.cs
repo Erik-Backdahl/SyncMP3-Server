@@ -7,5 +7,5 @@ public partial class DomainUser
     public bool Premium { get; set; } = false;
     public DateTime? PremiumExpirationDate { get; set; }
     public List<SongRequest> SongRequests { get; set; } = [];
-    public List<Song> DownloadedSongs { get; set; } = [];
+    public List<Song> LocalSongs { get; set; } = [];
 }

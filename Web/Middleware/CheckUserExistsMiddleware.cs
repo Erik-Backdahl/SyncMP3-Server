@@ -21,18 +21,11 @@ public class CheckUserExistsMiddleware
         var requestUserId = httpContext.User.FindFirst("sub")?.Value;
 
         if (requestUserId == null)
-        {
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.WriteAsync("Missing 'sub' claim in token.");
-            return;
-        }
+            throw new BadRequestException("Missing 'sub' claim in token.");
 
         if (!Guid.TryParse(requestUserId, out Guid userId))
-        {
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.WriteAsync("Invalid user id format.");
-            return;
-        }
+            throw new BadRequestException("Invalid user id format.");
+
 
         if (!await userService.UserExists(userId))
             await userService.CreateUser(userId);
@@ -42,29 +35,18 @@ public class CheckUserExistsMiddleware
         if (networkIdHeader != null)
         {
             if (!Guid.TryParse(networkIdHeader, out Guid networkId))
-            {
-                httpContext.Response.StatusCode = 400;
-                await httpContext.Response.WriteAsync("Invalid network id format.");
-                return;
-            }
+                throw new BadRequestException("Invalid network id format.");
+
 
             if (!await userService.UserNetworkMatchesUser(userId, networkId.ToString()))
-            {
-                httpContext.Response.StatusCode = 403;
-                await httpContext.Response.WriteAsync("Network does not match user");
-                return;
-            }
+                throw new BadRequestException("Network does not match user");
 
             await _next(httpContext);
             return;
         }
 
         if (!await userService.UserNetworkMatchesUser(userId, networkIdHeader))
-        {
-            httpContext.Response.StatusCode = 403;
-            await httpContext.Response.WriteAsync("Network does not match user");
-            return;
-        }
+            throw new BadRequestException("Network does not match user");
 
         await _next(httpContext);
     }

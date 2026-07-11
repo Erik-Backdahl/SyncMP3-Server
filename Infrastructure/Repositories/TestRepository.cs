@@ -1,4 +1,0 @@
-public class TestRepository : ITestRepository
-{
-
-}

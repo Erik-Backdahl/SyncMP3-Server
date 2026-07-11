@@ -71,7 +71,7 @@ public class SyncMp3DbContext : IdentityDbContext<ApplicationUser>
         // Song <-> DomainUser (many-to-many, downloaded songs per user)
         modelBuilder.Entity<Song>()
             .HasMany(s => s.DownloadedBy)
-            .WithMany(u => u.DownloadedSongs)
+            .WithMany(u => u.LocalSongs)
             .UsingEntity(j => j.ToTable("UserDownloadedSongs"));
 
         // ---------------- SongRequest ----------------
@@ -90,6 +90,10 @@ public class SyncMp3DbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(ds => ds.UploadedBy)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DownloadedSong>()
+        .HasIndex(d => new { d.SongId, d.NetworkId })
+        .IsUnique();
 
         // DownloadedSong -> UploadedBy is a bare Guid (no navigation property),
         // so no relationship is configured for it. Leave as a plain scalar
