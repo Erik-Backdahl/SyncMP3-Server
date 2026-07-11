@@ -1,0 +1,1 @@
+public record AnonymousAuthResponse(string Token);
