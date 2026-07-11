@@ -10,4 +10,5 @@ public partial class Network
     public List<Song> NetworkSongs { get; set; } = [];
     public List<DownloadedSong> DownloadedSongs { get; set; } = [];
     public List<SongRequest> SongRequests { get; set; } = [];
+    public List<NetworkKey> NetworkKeys { get; set; } = [];
 }

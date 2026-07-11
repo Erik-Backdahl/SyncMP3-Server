@@ -5,6 +5,7 @@ public class SyncMp3DbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<DomainUser> DomainUsers { get; set; }
     public DbSet<Network> Networks { get; set; }
+    public DbSet<NetworkKey> NetworkKeys { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<SongRequest> SongRequests { get; set; }
     public DbSet<DownloadedSong> DownloadedSongs { get; set; }
@@ -44,6 +45,13 @@ public class SyncMp3DbContext : IdentityDbContext<ApplicationUser>
             .WithOne(ds => ds.NetworkNavigation)
             .HasForeignKey(ds => ds.NetworkId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Network -> NetworkKeys (one-to-many)
+        modelBuilder.Entity<Network>()
+            .HasMany(n => n.NetworkKeys)
+            .WithOne(k => k.NetworkNavigation)
+            .HasForeignKey(k => k.NetworkId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Network -> SongRequests (one-to-many)
         modelBuilder.Entity<Network>()
@@ -95,8 +103,13 @@ public class SyncMp3DbContext : IdentityDbContext<ApplicationUser>
         .HasIndex(d => new { d.SongId, d.NetworkId })
         .IsUnique();
 
+
         // DownloadedSong -> UploadedBy is a bare Guid (no navigation property),
         // so no relationship is configured for it. Leave as a plain scalar
         // unless you intend it to be an FK to DomainUser.
+        // ----------------- NetworkKey ---------_------
+
+        modelBuilder.Entity<NetworkKey>()
+            .HasIndex(k => k.Code);
     }
 }
