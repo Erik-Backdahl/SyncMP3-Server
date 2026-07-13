@@ -31,4 +31,8 @@ public class UserRepository : IUserRepository
     {
         return await _dbContext.DomainUsers.AnyAsync(u => u.Id == id);
     }
+    public async Task<DomainUser> GetDomainUser(Guid id)
+    {
+        return await _dbContext.DomainUsers.SingleAsync(u => u.Id == id);
+    }
 }
