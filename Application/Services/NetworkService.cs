@@ -80,7 +80,7 @@ public class NetworkService : INetworkService
     {
         var network = await _networkRepository.GetNetwork(networkId);
 
-        if (network.Id != currentOwnerId)
+        if (network.OwnerId != currentOwnerId)
             throw new UnauthorizedException("Cant transfer title when not the owner, if you have lost the device with the owner its best to create a new network");
 
         await _networkRepository.TransferTitle(networkId, newOwnerId);
