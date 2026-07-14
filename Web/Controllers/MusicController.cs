@@ -15,7 +15,7 @@ public class MusicController : ControllerBase
         [FromBody] List<SongDTO> downloadedSongsDTO,
         [FromHeader(Name = "X-Network-Id")] Guid networkId)
     {
-        var userId = Guid.Parse(User.FindFirst("sub")?.Value!);
+        var userId = Guid.Parse(User.FindFirst("sub")!.Value!);
 
         var requestedFromServer = await _compareService.AddRequestedSongs(downloadedSongsDTO, userId, networkId);
         var canDownloadSongs = await _compareService.GetAvailibleSongs(networkId);
@@ -53,7 +53,7 @@ public class MusicController : ControllerBase
             await Request.Body.CopyToAsync(memoryStream);
             songBytes = memoryStream.ToArray();
 
-            var userId = Guid.Parse(User.FindFirst("sub")?.Value!);
+            var userId = Guid.Parse(User.FindFirst("sub")!.Value!);
 
             await System.IO.File.WriteAllBytesAsync(savePath, songBytes);
 
