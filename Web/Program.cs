@@ -42,11 +42,14 @@ namespace SyncMP3.Web
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICompareRepository, CompareRepository>();
+            builder.Services.AddScoped<INetworkRepository, NetworkRepository>();
+            builder.Services.AddScoped<INetworkKeyRepository, NetworkKeyRepository>();
 
 
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICompareService, CompareService>();
+            builder.Services.AddScoped<INetworkService, NetworkService>();
 
 
             var app = builder.Build();

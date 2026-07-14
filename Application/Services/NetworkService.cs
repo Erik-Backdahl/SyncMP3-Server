@@ -21,8 +21,8 @@ public class NetworkService : INetworkService
     {
         var user = await _userRepository.GetDomainUser(userId);
 
-        if (user.NetworkId != Guid.Empty)
-            throw new ConflictException("User already apart of a network");
+        if (user.NetworkId.HasValue && user.NetworkId != Guid.Empty)
+            throw new ConflictException("User already part of a network");
 
         var network = await _networkRepository.CreateNewNetwork(user);
 
