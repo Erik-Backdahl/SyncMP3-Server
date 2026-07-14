@@ -15,7 +15,7 @@ public class JoinEndpointTests : IClassFixture<ApiFactory>
         _client = factory.CreateClient();
     }
     [Fact]
-    public async Task Join_Success()
+    public async Task Join_RegularJoin()
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SyncMp3DbContext>();

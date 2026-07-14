@@ -15,7 +15,7 @@ public class GenerateKeyEndpointTests : IClassFixture<ApiFactory>
         _client = factory.CreateClient();
     }
     [Fact]
-    public async Task GenerateKey_Success()
+    public async Task GenerateKey_RegularCreation()
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SyncMp3DbContext>();
@@ -48,7 +48,7 @@ public class GenerateKeyEndpointTests : IClassFixture<ApiFactory>
 
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/network/generate-key");
         request.Headers.Add("X-Network-Id", scenario.User.NetworkId.ToString());
-        
+
         var response = await _client.SendAsync(request);
         await response.AssertStatusCode(HttpStatusCode.OK);
 
