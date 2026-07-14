@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Routing.Internal;
 
 public static class TestUserDataCreator
 {
@@ -26,7 +27,7 @@ public static class TestUserDataCreator
             .ToList();
 
         await db.DomainUsers.AddRangeAsync(allUsers);
-        await db.SaveChangesAsync(); 
+        await db.SaveChangesAsync();
 
         return (masterUser, allUsers);
     }
@@ -96,5 +97,18 @@ public static class TestUserDataCreator
         await db.SaveChangesAsync();
 
         return user;
+    }
+    internal static async Task<NetworkKey> AddNetworkKeyToNetwork(
+        SyncMp3DbContext db,
+        Guid networkId,
+        int keyMinTilExpiration = 60
+        )
+    {
+        var networkKey = TestDataBuilders.CreateNetworkKey(networkId, keyMinTilExpiration);
+
+        await db.NetworkKeys.AddAsync(networkKey);
+        await db.SaveChangesAsync();
+
+        return networkKey;
     }
 }

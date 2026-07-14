@@ -56,4 +56,16 @@ public static class TestDataBuilders
             FilePath = finalPath
         };
     }
+    public static NetworkKey CreateNetworkKey(
+        Guid networkId, int minuTilExpiration = 60
+    )
+    {
+        return new NetworkKey
+        {
+            Id = Guid.NewGuid(),
+            Code = NetworkKeyGenerator.GenerateCode(),
+            NetworkId = networkId,
+            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(minuTilExpiration)
+        };
+    }
 }

@@ -39,7 +39,7 @@ public class NetworkService : INetworkService
     {
         var currentKey = await _networkKeyRepository.GetCurrentNetworkKey(id);
 
-        if (currentKey == null)
+        if (currentKey == null || currentKey.IsExpired)
         {
             return await _networkKeyRepository.Create1HourKey(id);
         }

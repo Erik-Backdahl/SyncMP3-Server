@@ -11,8 +11,7 @@ public class NetworkKeyRepository : INetworkKeyRepository
     }
     public async Task<NetworkKey?> GetCurrentNetworkKey(Guid Id)
     {
-        return await _dbContext.NetworkKeys.FirstOrDefaultAsync(n => n.NetworkId == Id && !n.IsExpired);
-
+        return await _dbContext.NetworkKeys.FirstOrDefaultAsync(n => n.NetworkId == Id);
     }
     public Task<NetworkKey> Create1HourKey(Guid Id)
     {

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(SyncMp3DbContext))]
-    [Migration("20260711161851_NetworkKeys")]
-    partial class NetworkKeys
+    [Migration("20260714173033_NetworkKey")]
+    partial class NetworkKey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
