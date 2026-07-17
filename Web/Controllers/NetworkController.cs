@@ -77,7 +77,7 @@ public class NetworkController : ControllerBase
     [HttpPost("transfer-title")]
     public async Task<IActionResult> TransferTitle(
         [FromHeader(Name = "X-Network-Id")] Guid networkId,
-        [FromHeader(Name = "X-New-User-Id")] Guid newOwnerId
+        [FromHeader(Name = "X-New-Owner-Id")] Guid newOwnerId
     )
     {
         var userId = Guid.Parse(User.FindFirst("sub")!.Value!);

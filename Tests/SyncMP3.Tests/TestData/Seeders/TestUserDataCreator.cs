@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Routing.Internal;
 
 public static class TestUserDataCreator
 {
@@ -7,12 +8,10 @@ public static class TestUserDataCreator
     SyncMp3DbContext db, int memberAmount = 1
     )
     {
-        // 1. Create the owner with no network yet (NetworkId nullable)
         var masterUser = new DomainUser { Id = Guid.NewGuid() };
         await db.DomainUsers.AddAsync(masterUser);
         await db.SaveChangesAsync();
 
-        // 2. Create the network, now that masterUser.Id exists to satisfy OwnerId FK
         var network = new Network
         {
             Id = Guid.NewGuid(),
@@ -21,17 +20,14 @@ public static class TestUserDataCreator
         await db.Networks.AddAsync(network);
         await db.SaveChangesAsync();
 
-        // 3. Go back and attach the owner to the network
         masterUser.NetworkId = network.Id;
 
-        // 4. Other members can be created directly with NetworkId set — no cycle here,
-        //    since Network already exists and DomainUser -> Network is a one-way FK for them
         var allUsers = Enumerable.Range(0, memberAmount)
             .Select(_ => new DomainUser { Id = Guid.NewGuid(), NetworkId = network.Id })
             .ToList();
 
         await db.DomainUsers.AddRangeAsync(allUsers);
-        await db.SaveChangesAsync(); // saves both masterUser's NetworkId update and the new members
+        await db.SaveChangesAsync();
 
         return (masterUser, allUsers);
     }
@@ -92,5 +88,27 @@ public static class TestUserDataCreator
         await db.SaveChangesAsync();
 
         return downloadedSong;
+    }
+    internal static async Task<DomainUser> CreateEmptyUser(SyncMp3DbContext db)
+    {
+        var user = TestDataBuilders.CreateDomainUser();
+
+        await db.DomainUsers.AddAsync(user);
+        await db.SaveChangesAsync();
+
+        return user;
+    }
+    internal static async Task<NetworkKey> AddNetworkKeyToNetwork(
+        SyncMp3DbContext db,
+        Guid networkId,
+        int keyMinTilExpiration = 60
+        )
+    {
+        var networkKey = TestDataBuilders.CreateNetworkKey(networkId, keyMinTilExpiration);
+
+        await db.NetworkKeys.AddAsync(networkKey);
+        await db.SaveChangesAsync();
+
+        return networkKey;
     }
 }

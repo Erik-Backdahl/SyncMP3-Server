@@ -21,8 +21,8 @@ public class NetworkService : INetworkService
     {
         var user = await _userRepository.GetDomainUser(userId);
 
-        if (user.NetworkId != Guid.Empty)
-            throw new ConflictException("User already apart of a network");
+        if (user.NetworkId.HasValue && user.NetworkId != Guid.Empty)
+            throw new ConflictException("User already part of a network");
 
         var network = await _networkRepository.CreateNewNetwork(user);
 
@@ -39,7 +39,7 @@ public class NetworkService : INetworkService
     {
         var currentKey = await _networkKeyRepository.GetCurrentNetworkKey(id);
 
-        if (currentKey == null)
+        if (currentKey == null || currentKey.IsExpired)
         {
             return await _networkKeyRepository.Create1HourKey(id);
         }
@@ -80,7 +80,7 @@ public class NetworkService : INetworkService
     {
         var network = await _networkRepository.GetNetwork(networkId);
 
-        if (network.Id != currentOwnerId)
+        if (network.OwnerId != currentOwnerId)
             throw new UnauthorizedException("Cant transfer title when not the owner, if you have lost the device with the owner its best to create a new network");
 
         await _networkRepository.TransferTitle(networkId, newOwnerId);

@@ -23,8 +23,8 @@ public class NetworkRepository : INetworkRepository
         if (user == null)
             throw new NotFoundException("User not found");
 
-        if (user.NetworkId != Guid.Empty || user.NetworkId != null)
-            throw new BadRequestException("User already a part of a network");
+        if (user.NetworkId.GetValueOrDefault() != Guid.Empty)
+            throw new ConflictException("User already part of a network");
 
         var key = await _dbContext.NetworkKeys
             .Include(k => k.NetworkNavigation)
@@ -32,7 +32,7 @@ public class NetworkRepository : INetworkRepository
             .FirstOrDefaultAsync(n => n.Code == code);
 
         if (key is null || key.IsExpired)
-            throw new BadRequestException("Invalid code");
+            throw new NotFoundException("Invalid code");
 
         /* var network = _dbContext.Networks.Include(n => n.Users).SingleAsync(n => n.Id == key.NetworkId);
         //TODO CHECK IF MAX AMMOUNT OF USERS HAS BEEN REACHED
