@@ -11,4 +11,5 @@ public partial class Network
     public List<DownloadedSong> DownloadedSongs { get; set; } = [];
     public List<SongRequest> SongRequests { get; set; } = [];
     public List<NetworkKey> NetworkKeys { get; set; } = [];
+    public DateTime Created { get; set; } = DateTime.UtcNow;
 }
