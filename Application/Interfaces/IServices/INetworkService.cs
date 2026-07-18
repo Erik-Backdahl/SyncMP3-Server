@@ -1,5 +1,6 @@
 public interface INetworkService
 {
+    Task<NetworkInfoAndSongsDTO> GetFullNetworkInfo(Guid userId, Guid networkId);
     Task<Network> TryJoinNetwork(Guid id, string code);
     Task<NetworkCreateResponseDTO> CreateNewNetwork(Guid id);
     Task<NetworkKey> GenerateNewNetworkKey(Guid id);

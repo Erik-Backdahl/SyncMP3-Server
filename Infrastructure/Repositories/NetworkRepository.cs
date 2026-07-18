@@ -17,6 +17,18 @@ public class NetworkRepository : INetworkRepository
 
         return network;
     }
+    public async Task<Network> GetNetworkAndSongs(Guid id)
+    {
+        var networkAndSongs = await _dbContext.Networks
+            .Include(n => n.NetworkSongs)
+            .Include(n => n.Users)
+            .FirstOrDefaultAsync(n => n.Id == id);
+
+        if(networkAndSongs == null)
+            throw new NotFoundException("Network not found");
+
+        return networkAndSongs;
+    }
     public async Task<Network> JoinNetwork(Guid id, string code)
     {
         var user = await _dbContext.DomainUsers.SingleOrDefaultAsync(u => u.Id == id);
