@@ -12,7 +12,27 @@ public class NetworkService : INetworkService
         _userRepository = userRepository;
         _networkKeyRepository = networkKeyRepository;
     }
+    public async Task<NetworkInfoAndSongsDTO> GetFullNetworkInfo(Guid userId, Guid networkId)
+    {
+        var network = await _networkRepository.GetNetworkAndSongs(networkId);
 
+        int totalMembers = network.Users.Count;
+
+        return new NetworkInfoAndSongsDTO
+        {
+            NetworkId = network.Id,
+            Created = network.Created,
+            TotalMembers = network.Users.Count,
+            SongsOnNetwork = network.NetworkSongs.Select(song => new SongDTO
+            {
+                Id = song.Id,
+                Name = song.Name,
+                DurationSeconds = song.DurationSeconds
+            }).ToList()
+        };
+
+
+    }
     public async Task<Network> TryJoinNetwork(Guid id, string code)
     {
         return await _networkRepository.JoinNetwork(id, code);
