@@ -48,7 +48,8 @@ public class NetworkController : ControllerBase
         return Ok(new NetworkInfoDTO
         {
             NetworkId = network.Id,
-            TotalMembers = network.Users.Count
+            TotalMembers = network.Users.Count,
+            Created = network.Created
         });
     }
     [HttpPatch("remove-user")]
@@ -86,8 +87,16 @@ public class NetworkController : ControllerBase
 
         return Ok();
     }
-
-    /* 
     [HttpGet("info")]
- */
+    public async Task<IActionResult> NetworkInfo(
+        [FromHeader(Name = "X-Network-Id")] Guid networkId
+    )
+    {
+        var userId = Guid.Parse(User.FindFirst("sub")!.Value!);
+
+        var networkInfo = await _networkService.GetFullNetworkInfo(userId, networkId);
+    
+        return Ok(networkInfo);
+    }
+
 }
